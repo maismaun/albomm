@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Наш альбом воспоминаний</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400&family=Dancing+Script:wght@700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sakura-pink: #ffb7c5;
+            --deep-pink: #e75480;
+            --soft-white: #fff9f9;
+            --vintage-paper: #f8f0e8;
+            --branch-brown: #8b5a2b;
+            --leaf-green: #7a9f6e;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--soft-white);
+            color: #5a4a42;
+            margin: 0;
+            padding: 0;
+            line-height: 1.8;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .sakura-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(to bottom, #fff9fc 0%, #ffeef2 100%);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, rgba(255,183,197,0.8) 0%, rgba(255,232,236,0.9) 100%);
+            color: white;
+            text-align: center;
+            padding: 4rem 0 6rem;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+            clip-path: ellipse(100% 100% at 50% 0%);
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="rgba(255,255,255,0.3)" d="M50,30 Q60,20 70,30 T90,30 Q80,40 70,50 T50,70 Q40,80 30,70 T10,50 Q20,40 10,30 T30,30 Q40,20 50,30"></path></svg>');
+            opacity: 0.2;
+        }
+        
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin: 0;
+            color: var(--deep-pink);
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .subtitle {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2rem;
+            margin-top: 1rem;
+            color: var(--deep-pink);
+            display: inline-block;
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .categories {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 2rem auto;
+            max-width: 900px;
+            padding: 0 20px;
+        }
+        
+        .category-btn {
+            background: rgba(255, 183, 197, 0.3);
+            border: 2px solid var(--deep-pink);
+            color: var(--deep-pink);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .category-btn:hover, .category-btn.active {
+            background: var(--deep-pink);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(231, 84, 128, 0.3);
+        }
+        
+        .album-section {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .album-section.active {
+            display: block;
+        }
+        
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .photo-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.8s forwards;
+            border: 1px solid rgba(231, 84, 128, 0.1);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .photo-card:hover {
+            transform: translateY(-10px) scale(1.02) !important;
+            box-shadow: 0 15px 35px rgba(231, 84, 128, 0.15);
+        }
+        
+        .photo-img-container {
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .photo-img, .video-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
+        
+        .photo-img {
+            object-position: center top; /* Скрываем лица до увеличения */
+        }
+        
+        .photo-card:hover .photo-img, .photo-card:hover .video-preview {
+            transform: scale(1.05);
+        }
+        
+        .video-play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .photo-desc {
+            padding: 20px;
+            position: relative;
+            background: white;
+        }
+        
+        .photo-date {
+            color: var(--deep-pink);
+            font-family: 'Noto Serif JP', serif;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .photo-text {
+            font-size: 1rem;
+            color: #5a4a42;
+            line-height: 1.6;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+        }
+        
+        .modal-img, .modal-video {
+            max-width: 80%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        
+        .modal-img {
+            object-position: center center; /* Показываем лица при увеличении */
+        }
+        
+        .modal-video {
+            width: 80%;
+            height: auto;
+            aspect-ratio: 16/9;
+        }
+        
+        .modal-desc {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-width: 80%;
+            text-align: center;
+        }
+        
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .close:hover {
+            color: var(--sakura-pink);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(135deg, rgba(255,232,236,0.9) 0%, rgba(255,183,197,0.8) 100%);
+            color: white;
+            margin-top: 3rem;
+            position: relative;
+        }
+        
+        .sakura-icon {
+            color: var(--deep-pink);
+            font-size: 2rem;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+            margin: 0 5px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .signature {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: var(--deep-pink);
+            margin-top: 1rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .petals {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .petal {
+            position: absolute;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23ffb7c5" d="M50,0 Q60,20 70,10 Q80,30 90,20 Q80,40 90,50 Q80,60 70,50 Q60,70 50,60 Q40,70 30,50 Q20,60 10,50 Q20,40 10,20 Q20,30 30,10 Q40,20 50,0"></path></svg>');
+            background-size: contain;
+            width: 20px;
+            height: 20px;
+            opacity: 0;
+            animation: falling linear infinite;
+        }
+        
+        @keyframes falling {
+            0% {
+                transform: translate(0, -10vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(var(--end-x, 0), 100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.5rem;
+            }
+            
+            .categories {
+                gap: 10px;
+            }
+            
+            .category-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .photo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-img, .modal-video {
+                max-width: 95%;
+            }
+            
+            .modal-desc {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sakura-background"></div>
+    <div class="petals" id="petals-container"></div>
+    
+    <div id="mediaModal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <img id="expandedImg" class="modal-img" src="" alt="Увеличенное фото" style="display: none;">
+            <video id="expandedVideo" class="modal-video" controls style="display: none;">
+                Ваш браузер не поддерживает видео тег.
+            </video>
+            <div class="modal-desc" id="modalDescription"></div>
+        </div>
+    </div>
+    
+    <div class="header">
+        <h1>Наш альбом воспоминаний</h1>
+        <div class="subtitle">Каждый момент драгоценен</div>
+    </div>
+    
+    <div class="categories">
+        <button class="category-btn active" data-category="moments">Наши моменты</button>
+        <button class="category-btn" data-category="vitebsk">Витебск</button>
+        <button class="category-btn" data-category="walks">Прогулки</button>
+        <button class="category-btn" data-category="hotel">Отель</button>
+        <button class="category-btn" data-category="winter">Зима</button>
+        <button class="category-btn" data-category="kisses">Поцелуи</button>
+    </div>
+    
+    <!-- Наши моменты (15 фото) -->
+    <div id="moments" class="album-section active">
+        <div class="photo-grid">
+            <!-- Фото 1-15 -->
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', 'Заключение о браке')">
+                <div class="photo-img-container">
+                    <img src="photos/moments/photo1.jpg" alt="заключение о браке">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text">Наше Заключение о браке</div>
+                </div>
+            </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'video', 'Наше видео которое ты сделала сама', 'photos/videos/video1.mp4')">
+            <div class="photo-img-container">
+                <video class="video-preview" muted loop>
+                    <source src="photos/videos/video1.mp4" type="video/mp4">
+                </video>
+                <div class="video-play-icon">▶</div>
+            </div>
+            <div class="photo-desc">
+                <div class="photo-text">Наше видео которое ты сделала сама</div>
+            </div>
+        </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', 'Тут мы лежим вместе')">
+                <div class="photo-img-container">
+                    <img src="photos/moments/photo2.jpg" alt="Валяемся">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text">Тут мы лежим вместе</div>
+                </div>
+            </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'video', 'Хахаха украли паску', 'photos/videos/video3.mp4')">
+            <div class="photo-img-container">
+                <video class="video-preview" muted loop>
+                    <source src="photos/videos/video3.mp4" type="video/mp4">
+                </video>
+                <div class="video-play-icon">▶</div>
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text">Кушаем пасху</div>
+            </div>
+        </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', 'Ангелочки на снегу')">
+                <div class="photo-img-container">
+                    <img src="photos/moments/photo3.jpg" alt="Море">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text">Снежные следы</div>
+                </div>
+            </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'video', 'Довольные кушаем паску', 'photos/videos/video4.mp4')">
+            <div class="photo-img-container">
+                <video class="video-preview" muted loop>
+                    <source src="photos/videos/video4.mp4" type="video/mp4">
+                </video>
+                <div class="video-play-icon">▶</div>
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text">Кушаем</div>
+            </div>
+        </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', 'Нашли бутылку водки 1.5 литра')">
+                <div class="photo-img-container">
+                    <img src="photos/moments/photo4.jpg" alt="Нашли бутылку водки 1.5 литра">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text">Мы вместе</div>
+                </div>
+            </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'video', 'Тут мы пошутили', 'photos/videos/video5.mp4')">
+            <div class="photo-img-container">
+                <video class="video-preview" muted loop>
+                    <source src="photos/videos/video5.mp4" type="video/mp4">
+                </video>
+                <div class="video-play-icon">▶</div>
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text">Шутка минутка</div>
+            </div>
+        </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', 'Кушаем мороженое')">
+                <div class="photo-img-container">
+                    <img src="photos/moments/photo5.jpg" alt="Зима">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text">мороженое</div>
+                </div>
+		</div>
+    		<div class="photo-card" onclick="openMediaModal(this, 'video', 'Гуляем по парку ', 'photos/videos/video2.mp4')">
+            <div class="photo-img-container">
+                <video class="video-preview" muted loop>
+                    <source src="photos/videos/video2.mp4" type="video/mp4">
+                </video>
+                <div class="video-play-icon">▶</div>
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"> Первый раз катаю Элечку на плечах </div>
+            </div>
+        </div>
+                <div class="photo-card" onclick="openMediaModal(this, 'photo', 'Вечер в кафе')">
+                <div class="photo-img-container">
+                    <img src="photos/moments/photo6.jpg" alt="Кафе">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text">Романтический ужин в нашем любимом кафе</div>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+    <!-- Витебск (13 фото) -->
+    <div id="vitebsk" class="album-section">
+        <div class="photo-grid">
+            <!-- Фото 1-13 -->
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', 'Тут мы у меня в Витебске в ресторане')">
+                <div class="photo-img-container">
+                    <img src="photos/vitebsk/photo1.jpg" alt="Витебск 1">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text">Ресторан в Витебске</div>
+                </div>
+            </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'video', 'Едем ко мне домой', 'photos/videos/video6.mp4')">
+            <div class="photo-img-container">
+                <video class="video-preview" muted loop>
+                    <source src="photos/videos/video6.mp4" type="video/mp4">
+                </video>
+                <div class="video-play-icon">▶</div>
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text">Едем ко мне домой</div>
+            </div>
+        </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', ' ')">
+                <div class="photo-img-container">
+                    <img src="photos/vitebsk/photo2.jpg" alt="Витебск 2">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text"></div>
+                </div>
+            </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video7.mp4')">
+            <div class="photo-img-container">
+                <video class="video-preview" muted loop>
+                    <source src="photos/videos/video7.mp4" type="video/mp4">
+                </video>
+                <div class="video-play-icon">▶</div>
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', )">
+                <div class="photo-img-container">
+                    <img src="photos/vitebsk/photo3.jpg" alt="Витебск 3">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text"> </div>
+                </div>
+            </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video8.mp4')">
+            <div class="photo-img-container">
+                <video class="video-preview" muted loop>
+                    <source src="photos/videos/video8.mp4" type="video/mp4">
+                </video>
+                <div class="video-play-icon">▶</div>
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', ' ')">
+                <div class="photo-img-container">
+                    <img src="photos/vitebsk/photo4.jpg" alt="Витебск 4">
+                </div>
+                <div class="photo-desc">
+                   
+                    <div class="photo-text"> </div>
+                </div>
+            </div>
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', ' ')">
+                <div class="photo-img-container">
+                    <img src="photos/vitebsk/photo5.jpg" alt="Витебск 5">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text"></div>
+                </div>
+            </div>
+            
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', ' ')">
+                <div class="photo-img-container">
+                    <img src="photos/vitebsk/photo6.jpg" alt="Витебск 6">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text"> </div>
+                </div>
+            </div>
+            
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', ' ')">
+                <div class="photo-img-container">
+                    <img src="photos/vitebsk/photo7.jpg" alt="Витебск 7">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text"> </div>
+                </div>
+            </div>
+            
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', ' ')">
+                <div class="photo-img-container">
+                    <img src="photos/vitebsk/photo8.jpg" alt="Витебск 8">
+                </div>
+                <div class="photo-desc">
+                    
+                    <div class="photo-text"> </div>
+                </div>
+		</div>
+           	<div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video9.mp4')">
+            <div class="photo-img-container">
+                <video class="video-preview" muted loop>
+                    <source src="photos/videos/video9.mp4" type="video/mp4">
+                </video>
+                <div class="video-play-icon">▶</div>
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+		</div>
+	     </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Прогулки (35 фото) -->
+    <div id="walks" class="album-section">
+    <div class="photo-grid">
+        <!-- Фото 1 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo1.jpg" alt="Прогулка 1">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 2 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo2.jpg" alt="Прогулка 2">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 3 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo3.jpg" alt="Прогулка 3">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 4 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo4.jpg" alt="Прогулка 4">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 5 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo5.jpg" alt="Прогулка 5">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 6 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo6.jpg" alt="Прогулка 6">
+            </div>
+            <div class="photo-desc">
+           
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 7 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo7.jpg" alt="Прогулка 7">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 8 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo8.jpg" alt="Прогулка 8">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 9 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo9.jpg" alt="Прогулка 9">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 10 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo10.jpg" alt="Прогулка 10">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 11 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo11.jpg" alt="Прогулка 11">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 12 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo12.jpg" alt="Прогулка 12">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 13 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo13.jpg" alt="Прогулка 13">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 14 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo14.jpg" alt="Прогулка 14">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 15 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo15.jpg" alt="Прогулка 15">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 16 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo16.jpg" alt="Прогулка 16">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 17 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo17.jpg" alt="Прогулка 17">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+	<div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video11.mp4')">
+    <div class="photo-img-container">
+        <video class="video-preview" muted loop>
+            <source src="photos/videos/video11.mp4" type="video/mp4">
+        </video>
+        <div class="video-play-icon">▶</div>
+    </div>
+    <div class="photo-desc">
+        
+        <div class="photo-text"></div>
+          </div>
+	</div>
+        <!-- Фото 18 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo18.jpg" alt="Прогулка 18">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 19 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo19.jpg" alt="Прогулка 19">
+            </div>
+            <div class="photo-desc">
+                
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 20 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo20.jpg" alt="Прогулка 20">
+            </div>
+            <div class="photo-desc">
+               
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 21 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo21.jpg" alt="Прогулка 21">
+            </div>
+            <div class="photo-desc">
+                <div class="photo-date"></div>
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 22 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo22.jpg" alt="Прогулка 22">
+            </div>
+            <div class="photo-desc">
+                <div class="photo-date"></div>
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 23 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo23.jpg" alt="Прогулка 23">
+            </div>
+            <div class="photo-desc">
+                <div class="photo-date"></div>
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 24 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo24.jpg" alt="Прогулка 24">
+            </div>
+            <div class="photo-desc">
+                <div class="photo-date"></div>
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 25 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo25.jpg" alt="Прогулка 25">
+            </div>
+            <div class="photo-desc">
+                <div class="photo-date"></div>
+                <div class="photo-text"></div>
+            </div>
+        </div>
+        <!-- Фото 27 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo27.jpg" alt="Прогулка 27">
+            </div>
+            <div class="photo-desc">
+                <div class="photo-date"></div>
+                <div class="photo-text"></div>
+            </div>
+        </div>
+	<div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video10.mp4')">
+    <div class="photo-img-container">
+        <video class="video-preview" muted loop>
+            <source src="photos/videos/video10.mp4" type="video/mp4">
+        </video>
+        <div class="video-play-icon">▶</div>
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    	    </div>
+	</div>
+        <!-- Фото 28 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo28.jpg" alt="Прогулка 28">
+            </div>
+            <div class="photo-desc">
+                <div class="photo-date"></div>
+                <div class="photo-text"></div>
+            </div>
+        </div>
+
+        <!-- Фото 29 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/walks/photo29.jpg" alt="Прогулка 29">
+            </div>
+            <div class="photo-desc">
+                <div class="photo-date"></div>
+                <div class="photo-text"></div>
+            </div>
+        </div>
+       	    </div>
+    	  </div>
+	</div>
+    <!-- Отель (2 видео) -->
+    <div id="hotel" class="album-section">
+        <div class="photo-grid">
+            <div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video12.mp4')">
+    <div class="photo-img-container">
+        <video class="video-preview" muted loop>
+            <source src="photos/videos/video12.mp4" type="video/mp4">
+        </video>
+        <div class="video-play-icon">▶</div>
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+           </div>
+	</div>            
+           <div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video13.mp4')">
+    <div class="photo-img-container">
+        <video class="video-preview" muted loop>
+            <source src="photos/videos/video13.mp4" type="video/mp4">
+        </video>
+        <div class="video-play-icon">▶</div>
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+             </div>
+           </div>
+        </div>
+    </div>
+    
+    <!-- Зима (7 фото) -->
+    <div id="winter" class="album-section">
+        <div class="photo-grid">
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', ' ')">
+                <div class="photo-img-container">
+                    <img src="photos/winter/photo1.jpg" alt="Зима 1">
+                </div>
+                <div class="photo-desc">
+                    <div class="photo-date"></div>
+                    <div class="photo-text"></div>
+                </div>
+            </div>
+            
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+                <div class="photo-img-container">
+                    <img src="photos/winter/photo2.jpg" alt="Зима 2">
+                </div>
+                <div class="photo-desc">
+                    <div class="photo-date"></div>
+                    <div class="photo-text"></div>
+                </div>
+            </div>
+            
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+                <div class="photo-img-container">
+                    <img src="photos/winter/photo3.jpg" alt="Зима 3">
+                </div>
+                <div class="photo-desc">
+                    <div class="photo-date"></div>
+                    <div class="photo-text"></div>
+                </div>
+            </div>
+            
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+                <div class="photo-img-container">
+                    <img src="photos/winter/photo4.jpg" alt="Зима 4">
+                </div>
+                <div class="photo-desc">
+                    <div class="photo-date"></div>
+                    <div class="photo-text"></div>
+                </div>
+            </div>
+            
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+                <div class="photo-img-container">
+                    <img src="photos/winter/photo5.jpg" alt="Зима 5">
+                </div>
+                <div class="photo-desc">
+                    <div class="photo-date"></div>
+                    <div class="photo-text"></div>
+                </div>
+            </div>
+            
+            <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+                <div class="photo-img-container">
+                    <img src="photos/winter/photo6.jpg" alt="Зима 6">
+                </div>
+                <div class="photo-desc">
+                    <div class="photo-date"></div>
+                    <div class="photo-text"></div>
+                </div>
+            </div>
+        <!-- Фото 7 -->
+        <div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+            <div class="photo-img-container">
+                <img src="photos/winter/photo7.jpg" alt="Зимняя прогулка 7">
+            </div>
+            <div class="photo-desc">
+                <div class="photo-date"></div>
+                <div class="photo-text"></div>
+               </div>
+             </div>
+           </div>
+	</div>   
+	 <!-- Раздел "Поцелуи" (17 фото) -->
+    <div id="kisses" class="album-section">
+        <div class="photo-grid">
+        <!-- Фото 1 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo1.jpg" alt="Поцелуй 1">
+    </div>
+    <div class="photo-desc">
+        
+        <div class="photo-text"></div>
+      </div>
+  </div>
+
+<!-- Фото 2 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo2.jpg" alt="Поцелуй 2">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 3 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo3.jpg" alt="Поцелуй 3">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 4 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo4.jpg" alt="Поцелуй 4">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 5 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo5.jpg" alt="Поцелуй 5">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 6 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo6.jpg" alt="Поцелуй 6">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 7 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo7.jpg" alt="Поцелуй 7">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 8 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo8.jpg" alt="Поцелуй 8">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 9 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo9.jpg" alt="Поцелуй 9">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 10 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo10.jpg" alt="Поцелуй 10">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 11 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo11.jpg" alt="Поцелуй 11">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 12 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo12.jpg" alt="Поцелуй 12">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+
+<!-- Фото 13 -->
+<div class="photo-card" onclick="openMediaModal(this, 'photo', '')">
+    <div class="photo-img-container">
+        <img src="photos/kiss/photo13.jpg" alt="Поцелуй 13">
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date">.</div>
+        <div class="photo-text"></div>
+    </div>
+</div>
+    <div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video14.mp4')">
+    <div class="photo-img-container">
+        <video class="video-preview" muted loop>
+            <source src="photos/videos/video14.mp4" type="video/mp4">
+        </video>
+        <div class="video-play-icon">▶</div>
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+             </div>
+           </div>
+	<div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video15.mp4')">
+    <div class="photo-img-container">
+        <video class="video-preview" muted loop>
+            <source src="photos/videos/video15.mp4" type="video/mp4">
+        </video>
+        <div class="video-play-icon">▶</div>
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+             </div>
+           </div>
+	<div class="photo-card" onclick="openMediaModal(this, 'video', '', 'photos/videos/video16.mp4')">
+    <div class="photo-img-container">
+        <video class="video-preview" muted loop>
+            <source src="photos/videos/video16.mp4" type="video/mp4">
+        </video>
+        <div class="video-play-icon">▶</div>
+    </div>
+    <div class="photo-desc">
+        <div class="photo-date"></div>
+        <div class="photo-text"></div>
+             </div>
+           </div>
+
+    <div class="footer">
+        <p>Наша история продолжается... <span class="sakura-icon">❀</span></p>
+        <div class="signature"> Димка и Элечка </div>
+    </div>
+
+    <script>
+        // Создаем падающие лепестки
+        function createPetals(containerId, count) {
+            const container = document.getElementById(containerId);
+            for (let i = 0; i < count; i++) {
+                const petal = document.createElement('div');
+                petal.classList.add('petal');
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.width = (Math.random() * 15 + 10) + 'px';
+                petal.style.height = petal.style.width;
+                petal.style.opacity = Math.random() * 0.6 + 0.2;
+                petal.style.setProperty('--end-x', (Math.random() * 100 - 50) + 'px');
+                petal.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                petal.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(petal);
+            }
+        }
+        
+        // Переключение между категориями
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Удаляем активный класс у всех кнопок
+                document.querySelectorAll('.category-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                // Добавляем активный класс текущей кнопке
+                this.classList.add('active');
+                
+                // Скрываем все разделы
+                document.querySelectorAll('.album-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Показываем выбранный раздел
+                const category = this.getAttribute('data-category');
+                document.getElementById(category).classList.add('active');
+            });
+        });
+        
+        // Функции для модального окна
+        function openMediaModal(element, mediaType, description, videoSrc = null) {
+            const modal = document.getElementById("mediaModal");
+            const modalImg = document.getElementById("expandedImg");
+            const modalVideo = document.getElementById("expandedVideo");
+            const modalDesc = document.getElementById("modalDescription");
+            
+            // Скрываем все медиа элементы
+            modalImg.style.display = "none";
+            modalVideo.style.display = "none";
+            
+            if (mediaType === 'photo') {
+                // Получаем изображение из элемента, по которому кликнули
+                const img = element.querySelector('img') || element;
+                modalImg.src = img.src;
+                modalImg.alt = img.alt;
+                modalImg.style.display = "block";
+                
+                // Останавливаем видео, если оно играло
+                modalVideo.pause();
+            } else if (mediaType === 'video') {
+                // Устанавливаем источник видео
+                modalVideo.src = videoSrc || element.querySelector('video').src;
+                modalVideo.style.display = "block";
+                modalVideo.play();
+            }
+            
+            modalDesc.innerHTML = description;
+            modal.style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+        
+        // Закрытие модального окна
+        document.querySelector('.close').onclick = function() {
+            const modal = document.getElementById("mediaModal");
+            const modalVideo = document.getElementById("expandedVideo");
+            
+            modal.style.display = "none";
+            document.body.style.overflow = "auto";
+            modalVideo.pause();
+        }
+        
+        // Закрытие при клике вне изображения/видео
+        window.onclick = function(event) {
+            const modal = document.getElementById("mediaModal");
+            const modalVideo = document.getElementById("expandedVideo");
+            
+            if (event.target == modal) {
+                modal.style.display = "none";
+                document.body.style.overflow = "auto";
+                modalVideo.pause();
+            }
+        }
+        
+        // Автовоспроизведение видео при наведении (только превью)
+        document.querySelectorAll('.video-preview').forEach(video => {
+            video.addEventListener('mouseenter', function() {
+                this.play();
+            });
+            
+            video.addEventListener('mouseleave', function() {
+                this.pause();
+                this.currentTime = 0;
+            });
+        });
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            createPetals('petals-container', 25);
+            
+            // Плавное появление карточек
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.photo-card');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>
